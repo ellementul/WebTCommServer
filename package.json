@@ -1,0 +1,24 @@
+{
+  "name": "server-web-tcommander",
+  "version": "0.0.1",
+  "description": "files manager",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon ./index.js",
+    "test": "mocha"
+  },
+  "keywords": [
+    "manager",
+    "files"
+  ],
+  "author": "ellemntul",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.1",
+    "pug": "^2.0.4"
+  },
+  "devDependencies": {
+    "supertest": "^4.0.2"
+  }
+}
