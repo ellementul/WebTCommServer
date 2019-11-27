@@ -1,7 +1,5 @@
 const request = require('supertest');
-var app = require('./app');
-
-
+const app = require('./app');
 
 
 describe('POST /files', function() {
@@ -21,20 +19,40 @@ describe('POST /files', function() {
      .end(done);
   });
 
+  it('Create Dir', function(done) {
+
+    request(app)
+     .post('/files')
+     .send({
+        action: "CreateDir",
+        name: "tmp",
+        path: "./"
+     })
+     .set('Accept', 'application/json')
+     .expect('Content-Type', /json/)
+     .expect({
+        action: "CreateDir",
+        name: "tmp",
+        path: "./",
+        success: "Ok"
+      })
+     .end(done);
+  });
+
 
   it('Create file', function(done) {
 
     request(app)
      .post('/files')
      .send({
-        action: "Create",
+        action: "CreateFile",
         name: "File",
         path: "./tmp/"
      })
      .set('Accept', 'application/json')
      .expect('Content-Type', /json/)
      .expect({
-        action: "Create",
+        action: "CreateFile",
         name: "File",
         path: "./tmp/",
         success: "Ok"
@@ -60,18 +78,63 @@ describe('POST /files', function() {
      .end(done);
   });
 
-  it('Repeat create file', function(done) {
+  it('Copy file', function(done) {
 
     request(app)
      .post('/files')
      .send({
-        action: "Create",
+        action: "Copy",
         name: "File",
+        source_path: "./tmp/",
+        target_path: "./tmp2"
+     })
+     .set('Accept', 'application/json')
+     .expect('Content-Type', /json/)
+     .expect({
+        action: "Copy",
+        name: "File",
+        source_path: "./tmp/",
+        target_path: "./tmp2",
+        success: "Ok"
+      })
+     .end(done);
+  });
+
+  
+
+  it('Update files list', function(done) {
+
+    request(app)
+     .post('/files')
+     .send({
+        action: "ReadDir",
         path: "./tmp/"
      })
      .set('Accept', 'application/json')
      .expect('Content-Type', /json/)
-     .expect({error: "The file already exists"})
+     .expect({
+        action: "Update",
+        path: "./tmp/",
+        content: ["File"]
+     })
+     .end(done);
+  });
+
+  it('Update files list', function(done) {
+
+    request(app)
+     .post('/files')
+     .send({
+        action: "ReadDir",
+        path: "./tmp2/"
+     })
+     .set('Accept', 'application/json')
+     .expect('Content-Type', /json/)
+     .expect({
+        action: "Update",
+        path: "./tmp2/",
+        content: ["File"]
+     })
      .end(done);
   });
 
@@ -82,16 +145,76 @@ describe('POST /files', function() {
      .send({
         action: "Delete",
         name: "File",
-        path: "./tmp/"
+        path: "./tmp2/"
      })
      .set('Accept', 'application/json')
      .expect('Content-Type', /json/)
      .expect({
         action: "Delete",
         name: "File",
-        path: "./tmp/",
+        path: "./tmp2/",
         success: "Ok"
       })
+     .end(done);
+  });
+
+  it('Move file', function(done) {
+
+    request(app)
+     .post('/files')
+     .send({
+        action: "Move",
+        name: "File",
+        source_path: "./tmp/",
+        target_path: "./tmp2"
+     })
+     .set('Accept', 'application/json')
+     .expect('Content-Type', /json/)
+     .expect({
+        action: "Move",
+        name: "File",
+        source_path: "./tmp/",
+        target_path: "./tmp2",
+        success: "Ok"
+      })
+     .end(done);
+  });
+
+  it('Update files list', function(done) {
+
+    request(app)
+     .post('/files')
+     .send({
+        action: "ReadDir",
+        path: "./tmp/"
+     })
+     .set('Accept', 'application/json')
+     .expect('Content-Type', /json/)
+     .expect({
+        action: "Update",
+        path: "./tmp/",
+        content: []
+     })
+     .end(done);
+  });
+
+  
+
+  it('Update files list', function(done) {
+
+    request(app)
+     .post('/files')
+     .send({
+        action: "ReadDir",
+        path: "./tmp2/"
+     })
+     .set('Accept', 'application/json')
+     .expect('Content-Type', /json/)
+     .expect({
+        action: "Update",
+        path: "./tmp2/",
+        content: ["File"]
+     })
      .end(done);
   });
 
@@ -101,14 +224,14 @@ describe('POST /files', function() {
      .post('/files')
      .send({
         action: "Delete",
-        name: "tmp",
+        name: "tmp2",
         path: "./"
      })
      .set('Accept', 'application/json')
      .expect('Content-Type', /json/)
      .expect({
         action: "Delete",
-        name: "tmp",
+        name: "tmp2",
         path: "./",
         success: "Ok"
       })

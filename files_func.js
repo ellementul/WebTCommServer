@@ -1,4 +1,4 @@
-const fs = require("fs");
+const fs = require('fs-extra');
 const path = require("path");
 const child = require('child_process');
 
@@ -8,9 +8,12 @@ const child = require('child_process');
 function filesProcess(mess, callback){
 	switch(mess.action){
 		case "GetDisks" : getLoaclDisk(callback); break;
-		case "Create" : createFile(mess, callback); break;
+		case "CreateFile" : createFile(mess, callback); break;
+		case "CreateDir" : createDir(mess, callback); break;
 		case "ReadDir" : updateDir(mess.path, callback); break;
-		case "Delete" : deleteFileOrDir(mess, callback); break;
+		case "Move" : move(mess, callback); break;
+		case "Copy" : copy(mess, callback); break;
+		case "Delete" : remove(mess, callback); break;
 		default: callback({error: "Error parsing query!"});
 	}
 }
@@ -25,65 +28,66 @@ function getLoaclDisk(callback){
 	});
 }
 
-function checkPath(path){
-	try {
-	  fs.accessSync(path);
-	} catch (err) {
-	  fs.mkdirSync(path)
-	}
-}
-
 function createFile(opt, callback){
-	checkPath(opt.path);
-
 	let filename = path.join(opt.path, opt.name);
 
-	fs.access(filename, function(error){
-	    if (error)
-			fs.writeFile(filename, "", function(err){
-			    if (err)
-			        callback({error: err});
-			    else{
-			    	opt.success = "Ok";
-			        callback(opt);
-			    }
-			});
-	    else 
-	        callback({error: "The file already exists"});
-    });
-	
-}
-
-function deleteFileOrDir(opt, callback){
-	let filename = path.join(opt.path, opt.name);
-
-	fs.stat(filename, function(error, stats){
-	    if (stats.isFile())
-			deleteFile(opt, callback);
-	    else
-	        deleteDir(opt, callback);
-    });
-}
-
-function deleteDir(opt, callback){
-	let filename = path.join(opt.path, opt.name);
-	
-	fs.rmdir(filename, function(error){
-	    if (error)
-			callback({error});
+	fs.createFile(filename, function(err){
+	    if(err)
+	        callback({error: err.message});
 	    else{
 	    	opt.success = "Ok";
 	        callback(opt);
 	    }
-    });
+	});
+	
 }
 
-function deleteFile(opt, callback){
+function createDir(opt, callback){
 	let filename = path.join(opt.path, opt.name);
+
+	fs.mkdirp(filename, function(err){
+	    if(err)
+	        callback({error: err.message});
+	    else{
+	    	opt.success = "Ok";
+	        callback(opt);
+	    }
+	});
 	
-	fs.unlink(filename, function(error){
+}
+
+function move(opt, callback){
+	fs.move(path.join(opt.source_path, opt.name), path.join(opt.target_path, opt.name), function(err){
+	    if (err){
+	    	console.log(err);
+	        callback({error: err.message});
+	    }
+	    else{
+	    	opt.success = "Ok";
+	        callback(opt);
+	    }
+	});	
+}
+
+function copy(opt, callback){
+	fs.copy(path.join(opt.source_path, opt.name), path.join(opt.target_path, opt.name), function(err){
+	    if (err){
+	    	console.log(err);
+	        callback({error: err.message});
+	    }
+	    else{
+	    	opt.success = "Ok";
+	        callback(opt);
+	    }
+	});	
+}
+
+function remove(opt, callback){
+	let filename = path.join(opt.path, opt.name);
+
+	fs.remove(filename, function(error){
 	    if (error)
-			callback({error});
+			callback({error: err.message});
 	    else{
 	    	opt.success = "Ok";
 	        callback(opt);
@@ -94,7 +98,7 @@ function deleteFile(opt, callback){
 function updateDir(dir, callback){
 	fs.readdir(dir, function(err, items){
 		if (err)
-	        callback({error: err});
+	        callback({error: err.message});
 	    else
 	        callback({
 		       action: "Update",

@@ -1,6 +1,6 @@
 {
   "name": "server-web-tcommander",
-  "version": "0.0.1",
+  "version": "0.9.1",
   "description": "files manager",
   "main": "index.js",
   "scripts": {
@@ -15,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
+    "fs-extra": "^8.1.0",
     "nodemon": "^2.0.1",
     "pug": "^2.0.4"
   },
