@@ -31,81 +31,67 @@ function getLoaclDisk(callback){
 function createFile(opt, callback){
 	let filename = path.join(opt.path, opt.name);
 
-	fs.createFile(filename, function(err){
-	    if(err)
-	        callback({error: err.message});
-	    else{
-	    	opt.success = "Ok";
-	        callback(opt);
-	    }
-	});
-	
+	returnResult(fs.createFile(filename), opt, callback);
 }
 
 function createDir(opt, callback){
 	let filename = path.join(opt.path, opt.name);
 
-	fs.mkdirp(filename, function(err){
-	    if(err)
-	        callback({error: err.message});
-	    else{
-	    	opt.success = "Ok";
-	        callback(opt);
-	    }
-	});
+	returnResult(fs.ensureDir(filename), opt, callback);
 	
 }
 
 function move(opt, callback){
-	fs.move(path.join(opt.source_path, opt.name), path.join(opt.target_path, opt.name), function(err){
-	    if (err){
-	    	console.log(err);
-	        callback({error: err.message});
-	    }
-	    else{
-	    	opt.success = "Ok";
-	        callback(opt);
-	    }
-	});	
+	let source = path.join(opt.source_path, opt.name);
+	let target = path.join(opt.target_path, opt.name);
+
+	returnResult(fs.move(source, target), opt, callback);	
 }
 
 function copy(opt, callback){
-	fs.copy(path.join(opt.source_path, opt.name), path.join(opt.target_path, opt.name), function(err){
-	    if (err){
-	    	console.log(err);
-	        callback({error: err.message});
-	    }
-	    else{
-	    	opt.success = "Ok";
-	        callback(opt);
-	    }
-	});	
+	let source = path.join(opt.source_path, opt.name);
+	let target = path.join(opt.target_path, opt.name);
+
+	returnResult(fs.copy(source, target), opt, callback);	
 }
 
 function remove(opt, callback){
 	let filename = path.join(opt.path, opt.name);
 
-	fs.remove(filename, function(error){
-	    if (error)
-			callback({error: err.message});
-	    else{
-	    	opt.success = "Ok";
-	        callback(opt);
-	    }
-    });
+	returnResult(fs.remove(filename), opt, callback);
 }
 
 function updateDir(dir, callback){
-	fs.readdir(dir, function(err, items){
-		if (err)
-	        callback({error: err.message});
-	    else
-	        callback({
-		       action: "Update",
-		       path: dir,
-		       content: items
-		    });
-	});
+
+	fs.readdir(dir)
+	.then(fileNames => {
+		let files = fileNames.map(filename => fs.stat(path.join(dir, filename)));
+		return Promise.all([...files, fileNames]);
+	})
+	.then(filesStats => {
+		let fileNames = filesStats.pop();
+		let files = fileNames.map((fileName, index) => {
+			return {
+				name: fileName,
+				size: filesStats[index].size
+			}
+		});
+
+		callback({
+			action: "Update",
+        	path: dir,
+        	content: files
+		});
+	})
+	.catch(err => callback({error: err.message}));
+}
+
+function returnResult(promise, opt, cb){
+	promise.then(() => {
+		opt.success = "Ok";
+	    cb(opt);
+	})
+  	.catch(err => cb({error: err.message}));
 }
 
 module.exports = filesProcess;

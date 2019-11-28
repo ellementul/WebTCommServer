@@ -73,7 +73,10 @@ describe('POST /files', function() {
      .expect({
         action: "Update",
         path: "./tmp/",
-        content: ["File"]
+        content: [{
+            name: "File",
+            size: 0
+        }]
      })
      .end(done);
   });
@@ -115,7 +118,10 @@ describe('POST /files', function() {
      .expect({
         action: "Update",
         path: "./tmp/",
-        content: ["File"]
+        content: [{
+            name: "File",
+            size: 0
+        }]
      })
      .end(done);
   });
@@ -133,7 +139,10 @@ describe('POST /files', function() {
      .expect({
         action: "Update",
         path: "./tmp2/",
-        content: ["File"]
+        content: [{
+            name: "File",
+            size: 0
+        }]
      })
      .end(done);
   });
@@ -213,7 +222,10 @@ describe('POST /files', function() {
      .expect({
         action: "Update",
         path: "./tmp2/",
-        content: ["File"]
+        content: [{
+            name: "File",
+            size: 0
+        }]
      })
      .end(done);
   });
