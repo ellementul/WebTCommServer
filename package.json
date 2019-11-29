@@ -1,6 +1,6 @@
 {
   "name": "server-web-tcommander",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "files manager",
   "main": "index.js",
   "scripts": {

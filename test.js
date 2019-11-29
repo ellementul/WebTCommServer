@@ -75,6 +75,7 @@ describe('POST /files', function() {
         path: "./tmp/",
         content: [{
             name: "File",
+            isDir: false,
             size: 0
         }]
      })
@@ -120,9 +121,30 @@ describe('POST /files', function() {
         path: "./tmp/",
         content: [{
             name: "File",
+            isDir: false,
             size: 0
         }]
      })
+     .end(done);
+  });
+
+  it('Create Dir', function(done) {
+
+    request(app)
+     .post('/files')
+     .send({
+        action: "CreateDir",
+        name: "tmp",
+        path: "./tmp2/"
+     })
+     .set('Accept', 'application/json')
+     .expect('Content-Type', /json/)
+     .expect({
+        action: "CreateDir",
+        name: "tmp",
+        path: "./tmp2/",
+        success: "Ok"
+      })
      .end(done);
   });
 
@@ -141,6 +163,12 @@ describe('POST /files', function() {
         path: "./tmp2/",
         content: [{
             name: "File",
+            isDir: false,
+            size: 0
+        },
+        {
+            name: "tmp",
+            isDir: true,
             size: 0
         }]
      })
@@ -224,6 +252,12 @@ describe('POST /files', function() {
         path: "./tmp2/",
         content: [{
             name: "File",
+            isDir: false,
+            size: 0
+        },
+        {
+            name: "tmp",
+            isDir: true,
             size: 0
         }]
      })

@@ -14,7 +14,7 @@ function filesProcess(mess, callback){
 		case "Move" : move(mess, callback); break;
 		case "Copy" : copy(mess, callback); break;
 		case "Delete" : remove(mess, callback); break;
-		default: callback({error: "Error parsing query!"});
+		default: callback({error: "Error parsing query!", wrong_query: mess});
 	}
 }
 
@@ -73,6 +73,7 @@ function updateDir(dir, callback){
 		let files = fileNames.map((fileName, index) => {
 			return {
 				name: fileName,
+				isDir: filesStats[index].isDirectory(),
 				size: filesStats[index].size
 			}
 		});

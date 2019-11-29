@@ -6,7 +6,10 @@ var app = express();
 
 app.use(express.json());
 
+app.use(express.static('../client/dist'));
+
 app.post('/files', function(req, res){
+	res.append("Content-Security-Policy", "default-src 'self'")
 	filesProcess(req.body, resMessage => res.status(200).json(resMessage));
 });
 
