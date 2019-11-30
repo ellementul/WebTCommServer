@@ -1,5 +1,5 @@
 const fs = require('fs-extra');
-const path = require("path");
+const path = require('path');
 const child = require('child_process');
 
 
@@ -62,29 +62,45 @@ function remove(opt, callback){
 }
 
 function updateDir(dir, callback){
+	let fileNames = [];
 
 	fs.readdir(dir)
-	.then(fileNames => {
-		let files = fileNames.map(filename => fs.stat(path.join(dir, filename)));
-		return Promise.all([...files, fileNames]);
-	})
-	.then(filesStats => {
-		let fileNames = filesStats.pop();
-		let files = fileNames.map((fileName, index) => {
-			return {
-				name: fileName,
-				isDir: filesStats[index].isDirectory(),
-				size: filesStats[index].size
-			}
-		});
+	.then(fileNamesList => {
+		fileNames = fileNamesList;
 
-		callback({
-			action: "Update",
-        	path: dir,
-        	content: files
-		});
+		if(!fileNames.length){
+			callback({
+				action: "Update",
+	        	path: dir,
+	        	content: []
+			});
+
+			return;
+		}
+
+		let filePromises = fileNames.map(filename => fs.stat(path.join(dir, filename)));
+		return settledAllPromise(filePromises);
 	})
-	.catch(err => callback({error: err.message}));
+
+	.catch(err => callback({error: err.message}))
+
+	.then(filesStats => {
+		let files = fileNames.map((fileName, index) => {
+			if(filesStats[index].success)
+				return {
+					name: fileName,
+					isDir: filesStats[index].value.isDirectory(),
+					size: filesStats[index].value.size
+				}
+		}).filter(file => file);
+
+		if(files.length)
+			callback({
+				action: "Update",
+	        	path: dir,
+	        	content: files
+			});
+	});
 }
 
 function returnResult(promise, opt, cb){
@@ -96,3 +112,46 @@ function returnResult(promise, opt, cb){
 }
 
 module.exports = filesProcess;
+
+function settledAllPromise(promiseArrray){
+
+	return new Promise(function(res, rej){
+
+		let promiseCounter = promiseArrray.length;
+		let values = [];
+
+		let successCallback = value => {
+			values.push({
+				success: true,
+				value: value
+			});
+		}
+
+		let errorCallback = error => {
+			values.push({
+				success: false,
+				res: error
+			});
+		}
+
+		let finallyCallback = () => {
+			promiseCounter--;
+			if(!promiseCounter)
+				res(values);
+		}
+
+		promiseArrray.forEach((promise, index) => {
+			if(promise instanceof Promise)
+				promise.then(successCallback)
+				.catch(errorCallback)
+				.finally(finallyCallback)
+			else{
+				promiseCounter--;
+				values[index] = {
+					success: true,
+					value: promise
+				};
+			}
+		});
+	});
+}
