@@ -90,7 +90,8 @@ function updateDir(dir, callback){
 				return {
 					name: fileName,
 					isDir: filesStats[index].value.isDirectory(),
-					size: filesStats[index].value.size
+					size: filesStats[index].value.size,
+					ctime: getFullSecond(filesStats[index].value.ctime),
 				}
 		}).filter(file => file);
 
@@ -112,6 +113,10 @@ function returnResult(promise, opt, cb){
 }
 
 module.exports = filesProcess;
+
+function getFullSecond(dateFile){
+	return Math.floor(Date.parse(dateFile) / 1000) * 1000;
+}
 
 function settledAllPromise(promiseArrray){
 

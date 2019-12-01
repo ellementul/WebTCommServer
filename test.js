@@ -39,7 +39,7 @@ describe('POST /files', function() {
      .end(done);
   });
 
-
+  let ctime = getFullSecond(Date.now());
   it('Create file', function(done) {
 
     request(app)
@@ -61,6 +61,7 @@ describe('POST /files', function() {
   });
 
   it('Update files list', function(done) {
+    let time = Date.now();
 
     request(app)
      .post('/files')
@@ -76,12 +77,14 @@ describe('POST /files', function() {
         content: [{
             name: "File",
             isDir: false,
-            size: 0
+            size: 0,
+            ctime: ctime
         }]
      })
      .end(done);
   });
 
+  let copyTime = getFullSecond(Date.now());
   it('Copy file', function(done) {
 
     request(app)
@@ -122,12 +125,14 @@ describe('POST /files', function() {
         content: [{
             name: "File",
             isDir: false,
-            size: 0
+            size: 0,
+            ctime: ctime
         }]
      })
      .end(done);
   });
 
+  let dirTime = getFullSecond(Date.now());
   it('Create Dir', function(done) {
 
     request(app)
@@ -164,12 +169,14 @@ describe('POST /files', function() {
         content: [{
             name: "File",
             isDir: false,
-            size: 0
+            size: 0,
+            ctime: copyTime
         },
         {
             name: "tmp",
             isDir: true,
-            size: 0
+            size: 0,
+            ctime: dirTime
         }]
      })
      .end(done);
@@ -195,6 +202,7 @@ describe('POST /files', function() {
      .end(done);
   });
 
+  let moveTime = getFullSecond(Date.now());
   it('Move file', function(done) {
 
     request(app)
@@ -253,12 +261,14 @@ describe('POST /files', function() {
         content: [{
             name: "File",
             isDir: false,
-            size: 0
+            size: 0,
+            ctime: moveTime
         },
         {
             name: "tmp",
             isDir: true,
-            size: 0
+            size: 0,
+            ctime: dirTime
         }]
      })
      .end(done);
@@ -285,3 +295,7 @@ describe('POST /files', function() {
   });
   
 });
+
+function getFullSecond(dateFile){
+    return Math.floor(dateFile / 1000) * 1000;
+}
